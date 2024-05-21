@@ -16,7 +16,18 @@ export class ChatService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async sendMessage(senderId: string, body: SendMessageDto) {
+  async sendMessage(body: SendMessageDto) {
+    const senderUser = this.userRepository.findOneBy({
+      id: body.senderId,
+    });
+
+    if (!senderUser) {
+      throw new BaseException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Không tìm thấy người gửi',
+      });
+    }
+
     const receiverUser = this.userRepository.findOneBy({
       id: body.receiverId,
     });
@@ -31,7 +42,7 @@ export class ChatService {
     try {
       const message = new Message();
       message.content = body.content;
-      message.senderId = senderId;
+      message.senderId = body.senderId;
       message.receiverId = body.receiverId;
       message.type = body.type;
       message.isEdited = false;
@@ -50,5 +61,9 @@ export class ChatService {
         message: `Đã có lỗi xảy ra. ${error}`,
       });
     }
+  }
+
+  async findAll() {
+    return await this.messageRepository.find();
   }
 }

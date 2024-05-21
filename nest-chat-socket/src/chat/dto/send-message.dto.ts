@@ -6,6 +6,12 @@ export class SendMessageDto {
     type: String,
     format: 'uuid',
   })
+  senderId?: string;
+
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+  })
   receiverId: string;
 
   @ApiProperty()

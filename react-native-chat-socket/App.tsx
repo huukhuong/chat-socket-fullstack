@@ -1,118 +1,92 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { View, Text, FlatList, TextInput, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import socket from './src/services/socket';
+import axios from 'axios';
+import Constants from './src/utils/constants';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [listMessages, setListMessages] = useState<any[]>([]);
+  const [input, setInput] = useState('');
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const rs = await axios.get(Constants.URL + '/chat/all');
+        setListMessages(rs.data || []);
+      } catch (error) {
+        console.log(JSON.stringify(error, null, 2));
+      }
+    };
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+    fetchAll();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+    socket.emit('joinRoom', { userId: 'dd893335-f65a-4ad9-86d9-f73249ececfc' });
+    console.log(`Joining room: 'dd893335-f65a-4ad9-86d9-f73249ececfc'`);
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+    socket.on('message', newMessage => {
+      setListMessages(prevMessages => [...prevMessages, newMessage]);
+    });
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    return () => {
+      socket.off('message');
+    };
+  }, []);
+
+  const handleSendMessage = () => {
+    try {
+      if (input.trim()) {
+        socket.emit('message', {
+          senderId: 'dd893335-f65a-4ad9-86d9-f73249ececfc',
+          receiverId: 'dd893335-f65a-4ad9-86d9-f73249ececfc',
+          content: input,
+          type: 'text',
+        });
+        setInput('');
+      }
+    } catch (error) {
+      console.log(JSON.stringify(error, null, 2));
+    }
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <View style={{ flex: 1, backgroundColor: '#fff', paddingHorizontal: 16 }}>
+      <FlatList
+        data={listMessages}
+        renderItem={({ item }) => (
+          <View style={{ flex: 1, flexDirection: 'row', padding: 2 }}>
+            <Text
+              style={{
+                backgroundColor: '#cc778a',
+                color: '#fff',
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 4,
+              }}>
+              {item.content}
+            </Text>
+          </View>
+        )}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+      <View style={{ flexDirection: 'row' }}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          style={{
+            flex: 1,
+            height: 40,
+            borderColor: '#ccc',
+            borderWidth: 1,
+            paddingHorizontal: 10,
+            marginVertical: 10,
+            borderRadius: 4,
+          }}
+        />
+
+        <Button title="Send" onPress={handleSendMessage} />
+      </View>
+    </View>
+  );
+};
 
 export default App;
