@@ -46,7 +46,7 @@ const SplashPage = () => {
         navigation.replace('HomePage');
       } else {
         dispatch(setCurrentUser(null));
-        navigation.replace('LoginPage');
+        navigation.replace('LogInPage');
       }
     }, 1000);
   };

@@ -18,13 +18,18 @@ export class AuthService {
   ) {}
 
   async login(params: LoginDto) {
+    params = {
+      ...params,
+      username: params.username.trim(),
+      password: params.password.trim(),
+    };
     const userFind = await this.userRepository.findOne({
       where: [{ username: params.username }, { email: params.username }],
     });
 
     if (!userFind) {
       throw new BaseException({
-        message: 'Your Username or Email does not exist',
+        message: 'Email does not exist',
         statusCode: HttpStatus.UNAUTHORIZED,
       });
     }
@@ -66,6 +71,13 @@ export class AuthService {
   }
 
   async signUp(params: SignupDto, isAdmin = false) {
+    params = {
+      ...params,
+      username: params.username.trim(),
+      password: params.password.trim(),
+      email: params.email.trim(),
+      fullName: params.fullName.trim(),
+    };
     const duplicatedUser = await this.userRepository.findOneBy({
       username: params.username,
     });
@@ -93,17 +105,16 @@ export class AuthService {
     const newUser = this.userRepository.create({
       fullName: params.fullName,
       username: params.username,
+      email: params.email,
       password: hashPassword,
       isAdmin: isAdmin,
     });
 
     try {
-      const result = await this.userRepository.save(newUser);
-      return new BaseResponse({
-        statusCode: 200,
-        isSuccess: true,
-        data: result,
-        message: 'Sign up successfully',
+      await this.userRepository.save(newUser);
+      return this.login({
+        username: params.username,
+        password: params.password,
       });
     } catch (e) {
       throw new BaseException({

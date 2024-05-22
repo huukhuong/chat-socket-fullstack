@@ -15,7 +15,7 @@ const HomePage = () => {
   const handleLogout = () => {
     dispatch(setCurrentUser(null));
     removeLocalItem(LocalKey.userLogin);
-    navigation.replace('LoginPage');
+    navigation.replace('LogInPage');
   };
 
   return (

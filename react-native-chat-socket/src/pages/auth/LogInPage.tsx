@@ -20,7 +20,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
 import { useDispatch } from 'react-redux';
 
-const LoginPage = () => {
+const LogInPage = () => {
   const navigation = useNavigation<NavigationHookType>();
 
   const loginMethods = useForm<LoginModel>();
@@ -71,7 +71,7 @@ const LoginPage = () => {
     if (!username) {
       Toast.show({
         type: 'error',
-        text2: 'Please enter username or email address',
+        text2: 'Please enter your email address',
       });
       return;
     }
@@ -116,11 +116,8 @@ const LoginPage = () => {
               </Text>
             </View>
 
-            <FormGroup
-              className="my-4"
-              name="username"
-              label="Username or Email">
-              <InputAuth />
+            <FormGroup className="my-4" name="username" label="Email">
+              <InputAuth keyboardType="email-address" />
             </FormGroup>
 
             <FormGroup className="my-4" name="password" label="Password">
@@ -144,6 +141,15 @@ const LoginPage = () => {
             </BounceButton>
           </FormProvider>
         </ScrollView>
+
+        <View className="flex-row justify-center items-center bg-white p-2">
+          <Text className="text-gray-500">Don't have an account?</Text>
+          <BounceButton onPress={() => navigation.navigate('SignUpPage')}>
+            <Text className="font-bold text-primary py-2 px-1">
+              Sign up now
+            </Text>
+          </BounceButton>
+        </View>
       </View>
 
       <LoadingModal />
@@ -151,4 +157,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LogInPage;
