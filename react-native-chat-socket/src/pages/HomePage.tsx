@@ -100,6 +100,11 @@ const HomePage = () => {
             return (
               <View className="bg-placeholder">
                 <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('ChatPage', {
+                      receiverUser: undefined,
+                    })
+                  }
                   activeOpacity={0.8}
                   className="bg-white flex-row items-center px-4 py-3 space-x-3">
                   <View>

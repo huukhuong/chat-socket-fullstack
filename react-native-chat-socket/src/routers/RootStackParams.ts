@@ -6,7 +6,7 @@ export type RootStackParams = {
   SignUpPage: undefined;
   LogInPage: undefined;
   HomePage: undefined;
-  ChatPage: { receiverUser: UserModel };
+  ChatPage: { receiverUser?: UserModel };
 };
 
 export type NavigationHookType = NativeStackNavigationProp<RootStackParams>;

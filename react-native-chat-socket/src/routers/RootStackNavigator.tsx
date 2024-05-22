@@ -19,7 +19,13 @@ const RootStackNavigator = () => {
         <Stack.Screen name="LogInPage" component={LogInPage} />
         <Stack.Screen name="SignUpPage" component={SignUpPage} />
         <Stack.Screen name="HomePage" component={HomePage} />
-        <Stack.Screen name="ChatPage" component={ChatPage} />
+        <Stack.Screen
+          name="ChatPage"
+          component={ChatPage}
+          options={{
+            animation: 'ios',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
