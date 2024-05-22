@@ -11,6 +11,12 @@ import { SignupDto } from './dto/signup.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('/all')
+  @Public()
+  all() {
+    return this.authService.all();
+  }
+
   @Post('/login')
   @Public()
   login(@Body() params: LoginDto) {

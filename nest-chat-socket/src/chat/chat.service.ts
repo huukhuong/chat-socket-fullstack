@@ -46,7 +46,6 @@ export class ChatService {
       message.receiverId = body.receiverId;
       message.type = body.type;
       message.isEdited = false;
-      console.log(message);
 
       await this.messageRepository.save(message);
 
@@ -65,5 +64,21 @@ export class ChatService {
 
   async findAll() {
     return await this.messageRepository.find();
+  }
+
+  async findBetweenUsers(userId1: string, userId2: string) {
+    const res = await this.messageRepository.find({
+      where: [
+        { senderId: userId1, receiverId: userId2 },
+        { senderId: userId2, receiverId: userId1 },
+      ],
+      order: { createdAt: 'ASC' },
+    });
+
+    return new BaseResponse({
+      isSuccess: true,
+      statusCode: HttpStatus.OK,
+      data: res,
+    });
   }
 }

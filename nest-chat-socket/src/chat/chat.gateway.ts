@@ -13,6 +13,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { Injectable } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { UserDeviceService } from 'src/user-device/user-device.service';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 @WebSocketGateway()
@@ -22,7 +23,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly messageService: ChatService,
+    private readonly chatService: ChatService,
     private readonly authService: AuthService,
     private readonly userDeviceService: UserDeviceService,
   ) {}
@@ -43,19 +44,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           socketId: client.id,
           deviceId,
         });
-
-        console.log('socketId', client.id);
-        console.log('userId', user.userId);
-        console.log('deviceId', deviceId);
       }
     }
   }
 
   handleDisconnect(client: any) {
-    console.log('handleDisconnect', client.id);
-    this.userDeviceService.deleteUserDevice({
-      socketId: client.id,
-    });
+    if (client.id) {
+      this.userDeviceService.deleteUserDevice({
+        socketId: client.id,
+      });
+    }
   }
 
   async getUserFromToken(token: string) {
@@ -66,7 +64,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() body: SendMessageDto) {
-    await this.messageService.sendMessage(body);
-    this.server.emit('message', body.content);
+    const { senderId, receiverId } = body;
+
+    // lấy list sockets của người gửi và người nhận
+    const listSocketsOfSender =
+      await this.userDeviceService.getAllSocketIds(senderId);
+    const listSocketsOfReceiver =
+      await this.userDeviceService.getAllSocketIds(receiverId);
+
+    const newMessage = await this.chatService.sendMessage(body);
+    const emit = this.server;
+
+    const listMessage = await this.chatService.findBetweenUsers(
+      senderId,
+      receiverId,
+    );
+
+    [...listSocketsOfSender, ...listSocketsOfReceiver].map((socketId) => {
+      emit.to(socketId).emit('message', listMessage.data);
+    });
+  }
+
+  @SubscribeMessage('newUser')
+  async handleNewUser(@MessageBody() body: User) {
+    this.server.emit('newUser', body);
   }
 }

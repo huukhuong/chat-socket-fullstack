@@ -17,6 +17,15 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async all() {
+    const listUsers = await this.userRepository.find();
+    return new BaseResponse({
+      statusCode: HttpStatus.OK,
+      isSuccess: true,
+      data: listUsers,
+    });
+  }
+
   async login(params: LoginDto) {
     params = {
       ...params,

@@ -14,7 +14,7 @@ const LoadingModal = () => {
   }, [isFetching, isMutating]);
 
   return (
-    <Modal visible={loading} transparent statusBarTranslucent>
+    <Modal visible={loading} transparent>
       <View
         className="absolute z-50 top-0 left-0 bg-black/40 justify-center items-center"
         style={{

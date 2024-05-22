@@ -1,27 +1,38 @@
 import BounceButton from '@components/BounceButton';
 import Icon from '@components/Icon';
 import Text from '@components/Text';
+import { UserModel } from '@models/UserModel';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationHookType } from '@routers/RootStackParams';
+import authService from '@services/auth.service';
+import socketService from '@services/socket.service';
 import { FlashList } from '@shopify/flash-list';
 import { RootState } from '@stores/appStore';
 import { setCurrentUser } from '@stores/features/auth/authSlice';
+import { useQuery } from '@tanstack/react-query';
 import colors from '@utils/colors';
-import Constants from '@utils/constants';
 import { getDeviceId } from '@utils/helpers';
 import { LocalKey, removeLocalItem } from '@utils/localSave';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StatusBar, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import io from 'socket.io-client';
 
 const HomePage = () => {
   const currentUser = useSelector((state: RootState) => state.auth.currentUser);
+
   const navigation = useNavigation<NavigationHookType>();
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+
+  const { data: listUsers, refetch: fetchListUser } = useQuery({
+    queryKey: ['listUsers'],
+    queryFn: async () => {
+      const response = await authService.listUsers();
+      return response?.data || [];
+    },
+  });
 
   useEffect(() => {
     if (currentUser) {
@@ -32,16 +43,20 @@ const HomePage = () => {
   const connectSocket = async () => {
     const deviceId = await getDeviceId();
 
-    const socket = io(Constants.API_URL, {
-      query: { token: currentUser?.accessToken, deviceId },
+    socketService.initializeSocket(currentUser?.accessToken || '', deviceId);
+    socketService.getSocket()?.emit('newUser', currentUser);
+
+    socketService.getSocket()?.on('newUser', () => {
+      fetchListUser();
     });
 
     return () => {
-      socket.disconnect();
+      socketService?.disconnect();
     };
   };
 
   const handleLogout = () => {
+    socketService?.disconnect();
     dispatch(setCurrentUser(null));
     removeLocalItem(LocalKey.userLogin);
     navigation.replace('LogInPage');
@@ -78,7 +93,7 @@ const HomePage = () => {
 
         <Text className="font-bold text-white text-xl">HOME</Text>
 
-        <BounceButton>
+        <BounceButton onPress={handleLogout}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/76.jpg' }}
             className="h-12 w-12 rounded-full"
@@ -120,14 +135,14 @@ const HomePage = () => {
         <FlashList
           estimatedItemSize={100}
           showsVerticalScrollIndicator={false}
-          data={Array.from(Array(20))}
-          renderItem={() => {
+          data={listUsers?.filter(e => e.id !== currentUser?.id) || []}
+          renderItem={({ item }) => {
             return (
               <View className="bg-placeholder">
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate('ChatPage', {
-                      receiverUser: undefined,
+                      receiverUser: item,
                     })
                   }
                   activeOpacity={0.8}
@@ -145,7 +160,7 @@ const HomePage = () => {
                   </View>
 
                   <View className="flex-1">
-                    <Text className="font-bold text-lg">Alex Linderson</Text>
+                    <Text className="font-bold text-lg">{item.fullName}</Text>
                     <Text className="text-placeholder">How are you today?</Text>
                   </View>
 

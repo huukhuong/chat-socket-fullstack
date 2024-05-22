@@ -117,11 +117,11 @@ class Api {
       const message = `${error.message}`;
       console.log('[AXIOS ERROR MESSAGE]', message);
 
-      if (error.message.includes(`${this.timeout}ms`)) {
+      if (message.includes(`${this.timeout}ms`)) {
         this.showErrorToast(
           `Mạng yếu, vui lòng kểm tra lại kết nối.\n\n${message}`,
         );
-      } else if (error.message.includes('ERR_NETWORK')) {
+      } else if (message.includes('ERR_NETWORK')) {
         this.showErrorToast(
           `Lỗi mạng, vui lòng kết nối mạng và thử lại.\n\n${message}`,
         );

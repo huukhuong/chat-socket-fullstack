@@ -9,10 +9,15 @@ const login = async (body: LoginModel) => {
 
 const signUp = async (body: SignUpModel) => {
   return await api.post<UserModel>('/auth/signup', body);
-}
+};
+
+const listUsers = async () => {
+  return await api.get<UserModel[]>('/auth/all');
+};
 
 const authService = {
   login,
-  signUp
+  signUp,
+  listUsers,
 };
 export default authService;

@@ -1,5 +1,5 @@
 import { Image, StatusBar, TextInput, View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParams } from '@routers/RootStackParams';
 import appStyle from '@utils/appStyles';
@@ -8,18 +8,52 @@ import BounceButton from '@components/BounceButton';
 import Icon from '@components/Icon';
 import colors from '@utils/colors';
 import { FlashList } from '@shopify/flash-list';
+import { useSelector } from 'react-redux';
+import { RootState } from '@stores/appStore';
+import { MessageModel } from '@models/MessageModel';
+import socketService from '@services/socket.service';
+import { useQuery } from '@tanstack/react-query';
+import chatService from '@services/chat.service';
 
 type Props = NativeStackScreenProps<RootStackParams, 'ChatPage'>;
-const ChatPage = ({ route }: Props) => {
+const ChatPage = ({ navigation, route }: Props) => {
   const { receiverUser } = route.params;
   const flatListRef = useRef<FlashList<any>>(null);
 
-  useEffect(() => {}, []);
+  const currentUser = useSelector((state: RootState) => state.auth.currentUser);
+
+  const { data: messages } = useQuery({
+    queryKey: ['messages', currentUser?.id, receiverUser?.id],
+    queryFn: () =>
+      chatService.findMessagesBetweenUsers(currentUser?.id, receiverUser?.id),
+  });
+
+  const [listMessage, setListMessage] = useState<MessageModel[]>([]);
+  const [input, setInput] = useState('');
+
+  useEffect(() => {
+    socketService.getSocket()?.on('message', e => {
+      setListMessage(e);
+      flatListRef.current?.scrollToEnd({ animated: true });
+    });
+  }, []);
+
+  useEffect(() => {
+    setListMessage(messages?.data || []);
+  }, [messages]);
 
   const handleSend = () => {
-    flatListRef.current?.scrollToEnd({
-      animated: true,
-    });
+    if (currentUser && receiverUser) {
+      const message: MessageModel = {
+        senderId: currentUser?.id,
+        content: input,
+        receiverId: receiverUser?.id,
+        type: 'text',
+      };
+
+      setInput('');
+      socketService.getSocket()?.emit('message', message);
+    }
   };
 
   return (
@@ -33,7 +67,7 @@ const ChatPage = ({ route }: Props) => {
       <View
         style={appStyle.shadowMd}
         className="bg-white px-4 h-20 flex-row items-center z-10">
-        <BounceButton>
+        <BounceButton onPress={() => navigation.goBack()}>
           <Icon
             type="AntDesign"
             name="arrowleft"
@@ -53,7 +87,7 @@ const ChatPage = ({ route }: Props) => {
         </View>
 
         <View className="ml-3">
-          <Text className="font-bold text-lg">Alex Linderson</Text>
+          <Text className="font-bold text-lg">{receiverUser?.fullName}</Text>
           <Text className="text-placeholder">Active now</Text>
         </View>
       </View>
@@ -63,11 +97,10 @@ const ChatPage = ({ route }: Props) => {
         <FlashList
           ref={flatListRef}
           estimatedItemSize={200}
-          data={Array.from(Array(20))}
+          data={listMessage}
           showsVerticalScrollIndicator={false}
-          renderItem={() => {
-            const rand = Math.floor(Math.random() * 2) + 1;
-            const isMe = rand % 2;
+          renderItem={({ item }) => {
+            const isMe = item.senderId === currentUser?.id;
 
             return (
               <View
@@ -80,7 +113,7 @@ const ChatPage = ({ route }: Props) => {
                       ? 'bg-primary rounded-tr-none text-white'
                       : 'bg-gray-200 rounded-tl-none text-black'
                   }`}>
-                  Hello
+                  {item.content}
                 </Text>
               </View>
             );
@@ -108,6 +141,8 @@ const ChatPage = ({ route }: Props) => {
           placeholder="Write your message"
           multiline
           cursorColor={colors.primary}
+          value={input}
+          onChangeText={setInput}
         />
 
         <BounceButton
