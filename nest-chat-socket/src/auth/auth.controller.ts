@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/utils/decorators';
 import { AuthService } from './auth.service';
@@ -21,5 +21,11 @@ export class AuthController {
   @Public()
   signup(@Body() params: SignupDto) {
     return this.authService.signUp(params);
+  }
+
+  @Get('/find-one')
+  @Public()
+  findOne(@Param('id') userId: string) {
+    return this.authService.findOne(userId);
   }
 }

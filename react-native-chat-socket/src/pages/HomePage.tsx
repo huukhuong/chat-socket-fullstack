@@ -4,19 +4,42 @@ import Text from '@components/Text';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationHookType } from '@routers/RootStackParams';
 import { FlashList } from '@shopify/flash-list';
+import { RootState } from '@stores/appStore';
 import { setCurrentUser } from '@stores/features/auth/authSlice';
 import colors from '@utils/colors';
+import Constants from '@utils/constants';
+import { getDeviceId } from '@utils/helpers';
 import { LocalKey, removeLocalItem } from '@utils/localSave';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, StatusBar, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import io from 'socket.io-client';
 
 const HomePage = () => {
+  const currentUser = useSelector((state: RootState) => state.auth.currentUser);
   const navigation = useNavigation<NavigationHookType>();
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (currentUser) {
+      connectSocket();
+    }
+  }, [currentUser]);
+
+  const connectSocket = async () => {
+    const deviceId = await getDeviceId();
+
+    const socket = io(Constants.API_URL, {
+      query: { token: currentUser?.accessToken, deviceId },
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  };
 
   const handleLogout = () => {
     dispatch(setCurrentUser(null));
@@ -76,7 +99,9 @@ const HomePage = () => {
                 <View className="w-16 h-16 rounded-full p-[1.5px] border-2 border-yellow-400">
                   <Image
                     source={{
-                      uri: 'https://randomuser.me/api/portraits/men/75.jpg',
+                      uri: `https://randomuser.me/api/portraits/men/${
+                        Math.floor(Math.random() * 100) + 1
+                      }.jpg`,
                     }}
                     className="h-full w-full rounded-full"
                   />
@@ -110,7 +135,9 @@ const HomePage = () => {
                   <View>
                     <Image
                       source={{
-                        uri: 'https://randomuser.me/api/portraits/men/75.jpg',
+                        uri: `https://randomuser.me/api/portraits/men/${
+                          Math.floor(Math.random() * 100) + 1
+                        }.jpg`,
                       }}
                       className="h-14 w-14 rounded-full"
                     />

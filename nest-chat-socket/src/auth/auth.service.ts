@@ -164,6 +164,23 @@ export class AuthService {
     }
   }
 
+  async findOne(userId: string) {
+    const userFound = await this.userRepository.findOneBy({ id: userId });
+    if (userFound) {
+      return new BaseResponse({
+        statusCode: 200,
+        isSuccess: true,
+        data: userFound,
+        message: 'Founded',
+      });
+    } else {
+      throw new BaseException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'User not exists',
+      });
+    }
+  }
+
   private async generateToken(payload: User) {
     const payloadJson = {
       userId: payload.id,

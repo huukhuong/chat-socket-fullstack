@@ -6,6 +6,7 @@ import { dataSourceOption } from 'database/data-source';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { UserDeviceModule } from './user-device/user-device.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
     TypeOrmModule.forRoot(dataSourceOption),
     AuthModule,
     ChatModule,
+    UserDeviceModule,
   ],
   controllers: [],
   providers: [
