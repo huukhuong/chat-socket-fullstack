@@ -18,49 +18,49 @@ export class AuthService {
   ) {}
 
   async login(params: LoginDto) {
-    try {
-      const userFind = await this.userRepository.findOne({
-        where: { username: params.username },
+    const userFind = await this.userRepository.findOne({
+      where: [{ username: params.username }, { email: params.username }],
+    });
+
+    if (!userFind) {
+      throw new BaseException({
+        message: 'Your Username or Email does not exist',
+        statusCode: HttpStatus.UNAUTHORIZED,
       });
+    }
 
-      if (!userFind) {
-        throw new BaseException({
-          message: 'Sai username',
-          statusCode: HttpStatus.UNAUTHORIZED,
-        });
-      }
+    if (userFind.deletedAt) {
+      throw new BaseException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: 'Your account has been locked',
+      });
+    }
 
-      if (userFind.deletedAt) {
-        throw new BaseException({
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: 'Tài khoản đã bị khóa',
-        });
-      }
+    const checkPassword = bcrypt.compareSync(
+      params.password,
+      userFind.password,
+    );
 
-      const checkPassword = bcrypt.compareSync(
-        params.password,
-        userFind.password,
-      );
+    if (!checkPassword) {
+      throw new BaseException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: 'Your password is incorrect',
+      });
+    }
 
-      if (!checkPassword) {
-        throw new BaseException({
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: 'Sai mật khẩu',
-        });
-      }
-
+    try {
       const userWithToken = await this.generateToken(userFind);
       const { user, accessToken, refreshToken } = userWithToken;
       delete user.password;
 
       return new BaseResponse({
         data: { ...user, accessToken, refreshToken },
-        message: 'Đăng nhập thành công',
+        message: 'Logged in successfully',
       });
     } catch (error) {
       throw new BaseException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Có lỗi xảy ra.\n' + error.message,
+        message: error.message,
       });
     }
   }
@@ -73,7 +73,18 @@ export class AuthService {
     if (duplicatedUser) {
       throw new BaseException({
         statusCode: HttpStatus.CONFLICT,
-        message: 'Username đã tồn tại',
+        message: 'Username already exists',
+      });
+    }
+
+    const duplicatedEmail = await this.userRepository.findOneBy({
+      email: params.email,
+    });
+
+    if (duplicatedEmail) {
+      throw new BaseException({
+        statusCode: HttpStatus.CONFLICT,
+        message: 'Email already exists',
       });
     }
 
@@ -92,11 +103,11 @@ export class AuthService {
         statusCode: 200,
         isSuccess: true,
         data: result,
-        message: 'Tạo tài khoản thành công!',
+        message: 'Sign up successfully',
       });
     } catch (e) {
       throw new BaseException({
-        message: 'Có lỗi xảy ra.\n' + e.message,
+        message: e.message,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }

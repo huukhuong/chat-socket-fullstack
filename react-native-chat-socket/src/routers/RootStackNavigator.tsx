@@ -5,13 +5,17 @@ import { RootStackParams } from './RootStackParams';
 import LoginPage from '@pages/LoginPage';
 import HomePage from '@pages/HomePage';
 import ChatPage from '@pages/ChatPage';
+import SplashPage from '@pages/SplashPage';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
 const RootStackNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName="SplashPage">
+        <Stack.Screen name="SplashPage" component={SplashPage} />
         <Stack.Screen name="LoginPage" component={LoginPage} />
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="ChatPage" component={ChatPage} />

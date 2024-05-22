@@ -17,6 +17,7 @@ const InputAuth = (props: TextInputProps) => {
     <View className={`border-b border-placeholder`}>
       <TextInput
         className="h-[50px]"
+        autoCapitalize="none"
         {...props}
         onFocus={e => {
           props.onFocus && props.onFocus(e);
