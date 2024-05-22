@@ -11,4 +11,5 @@ export interface UserModel {
   updatedAt: Date;
   deletedAt: Date | null;
   accessToken: string;
+  isOnline?: boolean;
 }

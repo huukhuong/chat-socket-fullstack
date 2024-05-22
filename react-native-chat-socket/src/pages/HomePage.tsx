@@ -41,14 +41,16 @@ const HomePage = () => {
   }, [currentUser]);
 
   const connectSocket = async () => {
-    const deviceId = await getDeviceId();
+    if (socketService.getSocket() === null) {
+      const deviceId = await getDeviceId();
 
-    socketService.initializeSocket(currentUser?.accessToken || '', deviceId);
-    socketService.getSocket()?.emit('newUser', currentUser);
+      socketService.initializeSocket(currentUser?.accessToken || '', deviceId);
+      socketService.getSocket()?.emit('newUser', currentUser);
 
-    socketService.getSocket()?.on('newUser', () => {
-      fetchListUser();
-    });
+      socketService.getSocket()?.on('newUser', () => {
+        fetchListUser();
+      });
+    }
 
     return () => {
       socketService?.disconnect();
@@ -151,12 +153,16 @@ const HomePage = () => {
                     <Image
                       source={{
                         uri: `https://randomuser.me/api/portraits/men/${
-                          Math.floor(Math.random() * 100) + 1
+                          Math.floor(Math.random() * 80) + 1
                         }.jpg`,
                       }}
                       className="h-14 w-14 rounded-full"
                     />
-                    <View className="h-3 w-3 bg-green-500 rounded-full absolute bottom-0 right-1 border border-white" />
+                    <View
+                      className={`h-3 w-3 ${
+                        item.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                      } rounded-full absolute bottom-0 right-1 border border-white`}
+                    />
                   </View>
 
                   <View className="flex-1">

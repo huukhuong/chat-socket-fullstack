@@ -46,17 +46,10 @@ export class UserDeviceService {
     }
   }
 
-  async deleteUserDevice(body: AddUserDeviceDto) {
+  async deleteUserDevice(deviceId: string) {
     try {
-      const userDevice = await this.userDeviceRepository.findOne({
-        where: [
-          body.socketId
-            ? {
-                socketId: body.socketId,
-              }
-            : {},
-          body.deviceId ? { deviceId: body.deviceId } : {},
-        ],
+      const userDevice = await this.userDeviceRepository.findOneBy({
+        deviceId: deviceId,
       });
 
       const res = await this.userDeviceRepository.delete(userDevice);
@@ -65,6 +58,27 @@ export class UserDeviceService {
         statusCode: HttpStatus.OK,
         isSuccess: true,
         data: res,
+      });
+    } catch (e) {
+      throw new BaseException({
+        message: e.message,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  async deleteUserSocket(socketId: string) {
+    try {
+      const userDevice = await this.userDeviceRepository.findOneBy({
+        socketId: socketId,
+      });
+
+      await this.userDeviceRepository.delete(userDevice);
+
+      return new BaseResponse({
+        statusCode: HttpStatus.OK,
+        isSuccess: true,
+        data: userDevice.userId,
       });
     } catch (e) {
       throw new BaseException({

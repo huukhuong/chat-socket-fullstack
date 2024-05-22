@@ -45,14 +45,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           deviceId,
         });
       }
+
+      // cho user online
+      this.authService.setOnline(user.userId, true);
+      // noti cho user get lại list
+      this.server.emit('newUser', {});
     }
   }
 
-  handleDisconnect(client: any) {
-    if (client.id) {
-      this.userDeviceService.deleteUserDevice({
-        socketId: client.id,
-      });
+  async handleDisconnect(client: any) {
+    console.log('handleDisconnect client: ' + client.id);
+
+    try {
+      if (client.id) {
+        const { data: userId } = await this.userDeviceService.deleteUserSocket(
+          client.id,
+        );
+
+        // nếu còn socket của user đó => còn online
+        // nếu không còn socket nào => offline
+        const listSocketIds = await this.userDeviceService.getAllSocketIds(
+          client.id,
+        );
+
+        await this.authService.setOnline(
+          userId || '',
+          listSocketIds.length > 0,
+        );
+
+        // noti cho user get lại list
+        this.server.emit('newUser', {});
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -72,7 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const listSocketsOfReceiver =
       await this.userDeviceService.getAllSocketIds(receiverId);
 
-    const newMessage = await this.chatService.sendMessage(body);
+    await this.chatService.sendMessage(body); // save new message to db
     const emit = this.server;
 
     const listMessage = await this.chatService.findBetweenUsers(

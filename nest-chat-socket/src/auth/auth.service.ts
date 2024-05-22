@@ -190,6 +190,23 @@ export class AuthService {
     }
   }
 
+  async setOnline(userId: string, isOnline: boolean): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOneBy({ id: userId });
+
+      if (!user) {
+        console.error(`User with ID ${userId} not found.`);
+        return false;
+      }
+
+      await this.userRepository.update(userId, { isOnline });
+      return true;
+    } catch (error) {
+      console.error(`Error setting online status for user ${userId}:`, error);
+      return false;
+    }
+  }
+
   private async generateToken(payload: User) {
     const payloadJson = {
       userId: payload.id,

@@ -4,7 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('users')
@@ -66,4 +66,9 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({
+    nullable: true,
+  })
+  isOnline: boolean;
 }
