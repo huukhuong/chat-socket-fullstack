@@ -67,7 +67,7 @@ export class ChatService {
   }
 
   async findBetweenUsers(userId1: string, userId2: string) {
-    const res = await this.messageRepository
+    const queryBuilder = this.messageRepository
       .createQueryBuilder('message')
       .where('message.senderId = :userId1 AND message.receiverId = :userId2', {
         userId1,
@@ -77,8 +77,14 @@ export class ChatService {
         'message.senderId = :userId2 AND message.receiverId = :userId1',
         { userId1, userId2 },
       )
-      .orderBy('message.createdAt', 'ASC')
-      .getMany();
+      .orderBy('message.createdAt', 'ASC');
+
+    const res = await queryBuilder.getMany();
+
+    console.log({
+      userId1,
+      userId2,
+    });
 
     return new BaseResponse({
       isSuccess: true,

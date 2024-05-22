@@ -23,7 +23,7 @@ const ChatPage = ({ navigation, route }: Props) => {
   const currentUser = useSelector((state: RootState) => state.auth.currentUser);
 
   const { data: messages } = useQuery({
-    queryKey: ['messages', currentUser?.id, receiverUser?.id],
+    queryKey: ['messages', currentUser, receiverUser],
     queryFn: () =>
       chatService.findMessagesBetweenUsers(currentUser?.id, receiverUser?.id),
   });

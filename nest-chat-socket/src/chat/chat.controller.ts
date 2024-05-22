@@ -21,7 +21,7 @@ export class ChatController {
     return this.chatService.findAll();
   }
 
-  @Get('/between-users')
+  @Get('/between-users/:userId1/:userId2')
   @Public()
   findBetweenusers(
     @Param('userId1') userId1: string,
