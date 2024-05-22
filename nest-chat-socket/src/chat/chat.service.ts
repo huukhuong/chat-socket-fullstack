@@ -67,13 +67,18 @@ export class ChatService {
   }
 
   async findBetweenUsers(userId1: string, userId2: string) {
-    const res = await this.messageRepository.find({
-      where: [
-        { senderId: userId1, receiverId: userId2 },
-        { senderId: userId2, receiverId: userId1 },
-      ],
-      order: { createdAt: 'ASC' },
-    });
+    const res = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.senderId = :userId1 AND message.receiverId = :userId2', {
+        userId1,
+        userId2,
+      })
+      .orWhere(
+        'message.senderId = :userId2 AND message.receiverId = :userId1',
+        { userId1, userId2 },
+      )
+      .orderBy('message.createdAt', 'ASC')
+      .getMany();
 
     return new BaseResponse({
       isSuccess: true,
