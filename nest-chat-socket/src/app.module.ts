@@ -7,6 +7,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { UserDeviceModule } from './user-device/user-device.module';
+import { UserRelationshipModule } from './user-relationship/user-relationship.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserDeviceModule } from './user-device/user-device.module';
     AuthModule,
     ChatModule,
     UserDeviceModule,
+    UserRelationshipModule,
   ],
   controllers: [],
   providers: [
