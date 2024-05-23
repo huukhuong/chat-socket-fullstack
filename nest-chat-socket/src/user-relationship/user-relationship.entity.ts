@@ -1,8 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/auth/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum RelationshipType {
-  PendingFirstSecond = 'pending_first_second',
-  PendingSecondFirst = 'pending_second_first',
+  Pending = 'pending',
+  Cancel = 'cancel',
   Friends = 'friends',
 }
 
@@ -19,4 +20,12 @@ export class UserRelationship {
 
   @Column({ nullable: true })
   type: RelationshipType;
+
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'userFirstId' })
+  firstUser: User;
+
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'userSecondId' })
+  secondUser: User;
 }

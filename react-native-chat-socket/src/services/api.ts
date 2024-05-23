@@ -95,6 +95,37 @@ class Api {
     }
   }
 
+  public async put<T>(
+    url: string,
+    params?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<ResponseModel<T | null> | null> {
+    config = {
+      ...config,
+      headers: { Authorization: `Bearer ${this.token}` },
+    };
+
+    try {
+      const response = await this.axiosInstance.put(url, params, config);
+
+      console.log('====================================');
+      console.log('[POST]', this.axiosInstance.defaults.baseURL + url);
+      if (params) {
+        console.log('Body:\n' + JSON.stringify(params));
+      }
+      console.log('Response:\n' + JSON.stringify(response.data));
+      console.log('====================================');
+
+      if (!response.data.isSuccess) {
+        this.handleError(response.data);
+      }
+      return response.data;
+    } catch (error: any) {
+      this.handleError(error);
+      return null;
+    }
+  }
+
   private handleError(error: any) {
     console.log('====================================');
     console.log('[FETCH ERROR]', JSON.stringify(error, null, 2));

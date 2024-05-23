@@ -100,7 +100,7 @@ const HomePage = () => {
 
         <Text className="font-bold text-white text-xl">HOME</Text>
 
-        <BounceButton onPress={handleLogout}>
+        <BounceButton onPress={() => navigation.navigate('FriendRequestPage')}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/76.jpg' }}
             className="h-12 w-12 rounded-full"

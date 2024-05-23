@@ -7,6 +7,7 @@ export type RootStackParams = {
   LogInPage: undefined;
   HomePage: undefined;
   ChatPage: { receiverUser?: UserModel };
+  FriendRequestPage: undefined;
 };
 
 export type NavigationHookType = NativeStackNavigationProp<RootStackParams>;
