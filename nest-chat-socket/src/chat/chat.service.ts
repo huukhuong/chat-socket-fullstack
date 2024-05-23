@@ -6,7 +6,10 @@ import { Message } from './message.entity';
 import { User } from 'src/auth/user.entity';
 import BaseException from 'src/utils/base-exception';
 import BaseResponse from 'src/utils/base-response';
-import { UserRelationship } from 'src/user-relationship/user-relationship.entity';
+import {
+  RelationshipType,
+  UserRelationship,
+} from 'src/user-relationship/user-relationship.entity';
 import { FriendWithLastMessageDto } from './dto/friend-with-last-message.dto';
 
 @Injectable()
@@ -99,9 +102,12 @@ export class ChatService {
         where: [{ userFirstId: userId }, { userSecondId: userId }],
       });
 
-      const friendIds = relationships.map((rel) =>
-        rel.userFirstId === userId ? rel.userSecondId : rel.userFirstId,
-      );
+      // only get friends
+      const friendIds = relationships
+        .filter((e) => e.type === RelationshipType.Friends)
+        .map((rel) =>
+          rel.userFirstId === userId ? rel.userSecondId : rel.userFirstId,
+        );
 
       // Step 2: For each friend, get the last message
       const friendsWithLastMessage: FriendWithLastMessageDto[] = [];

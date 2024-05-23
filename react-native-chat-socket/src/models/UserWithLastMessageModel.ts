@@ -3,5 +3,5 @@ import { UserModel } from './UserModel';
 
 export interface UserWithLastMessageModel {
   user: UserModel;
-  lastMessage: MessageModel;
+  lastMessage?: MessageModel;
 }

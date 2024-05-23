@@ -175,7 +175,7 @@ const HomePage = () => {
                       {item.user.fullName}
                     </Text>
                     <Text className="text-placeholder">
-                      {item.lastMessage.content}
+                      {item.lastMessage?.content}
                     </Text>
                   </View>
 

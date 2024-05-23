@@ -3,5 +3,5 @@ import { Message } from '../message.entity';
 
 export class FriendWithLastMessageDto {
   user: User;
-  lastMessage: Message;
+  lastMessage?: Message;
 }
