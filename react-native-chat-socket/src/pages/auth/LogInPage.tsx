@@ -53,7 +53,6 @@ const LogInPage = () => {
         setLocalItem(LocalKey.userLogin, JSON.stringify(response.data));
         setLocalItem(LocalKey.username, username);
         setLocalItem(LocalKey.password, password);
-        navigation.replace('HomePage');
 
         Toast.show({
           type: 'success',

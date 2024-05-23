@@ -1,10 +1,9 @@
 import BounceButton from '@components/BounceButton';
 import Icon from '@components/Icon';
 import Text from '@components/Text';
-import { UserModel } from '@models/UserModel';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationHookType } from '@routers/RootStackParams';
-import authService from '@services/auth.service';
+import chatService from '@services/chat.service';
 import socketService from '@services/socket.service';
 import { FlashList } from '@shopify/flash-list';
 import { RootState } from '@stores/appStore';
@@ -13,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import colors from '@utils/colors';
 import { getDeviceId } from '@utils/helpers';
 import { LocalKey, removeLocalItem } from '@utils/localSave';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Image, StatusBar, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,9 +26,11 @@ const HomePage = () => {
   const insets = useSafeAreaInsets();
 
   const { data: listUsers, refetch: fetchListUser } = useQuery({
-    queryKey: ['listUsers'],
+    queryKey: ['listUsers', currentUser?.id],
     queryFn: async () => {
-      const response = await authService.listUsers();
+      const response = await chatService.getFriendsWithLastestMessage(
+        currentUser?.id,
+      );
       return response?.data || [];
     },
   });
@@ -48,6 +49,10 @@ const HomePage = () => {
       socketService.getSocket()?.emit('newUser', currentUser);
 
       socketService.getSocket()?.on('newUser', () => {
+        fetchListUser();
+      });
+
+      socketService.getSocket()?.on('message', () => {
         fetchListUser();
       });
     }
@@ -137,14 +142,14 @@ const HomePage = () => {
         <FlashList
           estimatedItemSize={100}
           showsVerticalScrollIndicator={false}
-          data={listUsers?.filter(e => e.id !== currentUser?.id) || []}
+          data={listUsers?.filter(e => e.user.id !== currentUser?.id) || []}
           renderItem={({ item }) => {
             return (
               <View className="bg-placeholder">
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate('ChatPage', {
-                      receiverUser: item,
+                      receiverUser: item.user,
                     })
                   }
                   activeOpacity={0.8}
@@ -160,14 +165,18 @@ const HomePage = () => {
                     />
                     <View
                       className={`h-3 w-3 ${
-                        item.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                        item.user.isOnline ? 'bg-green-500' : 'bg-gray-300'
                       } rounded-full absolute bottom-0 right-1 border border-white`}
                     />
                   </View>
 
                   <View className="flex-1">
-                    <Text className="font-bold text-lg">{item.fullName}</Text>
-                    <Text className="text-placeholder">How are you today?</Text>
+                    <Text className="font-bold text-lg">
+                      {item.user.fullName}
+                    </Text>
+                    <Text className="text-placeholder">
+                      {item.lastMessage.content}
+                    </Text>
                   </View>
 
                   <View>

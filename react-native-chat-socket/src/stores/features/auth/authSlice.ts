@@ -3,18 +3,21 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 interface CounterState {
-  currentUser: null | UserModel;
+  currentUser: undefined | null | UserModel;
 }
 
 const initialState: CounterState = {
-  currentUser: null,
+  currentUser: undefined,
 };
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setCurrentUser: (state, action: PayloadAction<null | UserModel>) => {
+    setCurrentUser: (
+      state,
+      action: PayloadAction<undefined | null | UserModel>,
+    ) => {
       state.currentUser = action.payload;
     },
   },

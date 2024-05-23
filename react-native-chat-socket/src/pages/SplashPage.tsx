@@ -1,12 +1,10 @@
 import Images from '@assets/images';
 import { UserModel } from '@models/UserModel';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationHookType } from '@routers/RootStackParams';
 import { setCurrentUser } from '@stores/features/auth/authSlice';
 import colors from '@utils/colors';
 import { getLocalItem, LocalKey } from '@utils/localSave';
 import React, { useEffect } from 'react';
-import { Image, StatusBar, View } from 'react-native';
+import { StatusBar, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
   useAnimatedStyle,
@@ -17,8 +15,6 @@ import Animated, {
 import { useDispatch } from 'react-redux';
 
 const SplashPage = () => {
-  const navigation = useNavigation<NavigationHookType>();
-
   const dispatch = useDispatch();
 
   const logoPosition = useSharedValue(0);
@@ -43,10 +39,8 @@ const SplashPage = () => {
       if (userStr) {
         const userObj = JSON.parse(userStr) as UserModel;
         dispatch(setCurrentUser(userObj));
-        navigation.replace('HomePage');
       } else {
         dispatch(setCurrentUser(null));
-        navigation.replace('LogInPage');
       }
     }, 1000);
   };

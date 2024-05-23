@@ -1,4 +1,4 @@
-import { Image, StatusBar, TextInput, View } from 'react-native';
+import { Image, Keyboard, StatusBar, TextInput, View } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParams } from '@routers/RootStackParams';
@@ -36,6 +36,15 @@ const ChatPage = ({ navigation, route }: Props) => {
       setListMessage(e);
       flatListRef.current?.scrollToEnd({ animated: true });
     });
+
+    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    });
+
+    return () => {
+      socketService.getSocket()?.off('message');
+      keyboardShowListener.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -50,6 +59,8 @@ const ChatPage = ({ navigation, route }: Props) => {
         receiverId: receiverUser?.id,
         type: 'text',
       };
+
+      setListMessage([...listMessage, message]);
 
       setInput('');
       socketService.getSocket()?.emit('message', message);

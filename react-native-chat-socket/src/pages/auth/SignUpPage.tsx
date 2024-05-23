@@ -40,7 +40,6 @@ const SignUpPage = () => {
         setLocalItem(LocalKey.userLogin, JSON.stringify(response.data));
         setLocalItem(LocalKey.username, email);
         setLocalItem(LocalKey.password, password);
-        navigation.replace('HomePage');
 
         Toast.show({
           type: 'success',

@@ -1,4 +1,6 @@
 import { ResponseModel } from '@models/ResponseModel';
+import { appStore } from '@stores/appStore';
+import { setCurrentUser } from '@stores/features/auth/authSlice';
 import Constants from '@utils/constants';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import Toast from 'react-native-toast-message';
@@ -103,8 +105,8 @@ class Api {
       if (json) {
         console.log('error.response', json);
 
-        if (json.code === 401) {
-          // logout
+        if (json.statusCode === 401) {
+          appStore.dispatch(setCurrentUser(null));
         }
 
         if (json.message) {
