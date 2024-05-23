@@ -54,6 +54,38 @@ export class UserRelationshipService {
     });
   }
 
+  async listNotRelation(userId: string) {
+    // Subquery to find users in a relationship where the given user is userFirstId
+    const subquery1 = this.userRelationshipRepository
+      .createQueryBuilder('relationship')
+      .select('relationship.userSecondId')
+      .where('relationship.userFirstId = :userId')
+      .getQuery();
+
+    // Subquery to find users in a relationship where the given user is userSecondId
+    const subquery2 = this.userRelationshipRepository
+      .createQueryBuilder('relationship')
+      .select('relationship.userFirstId')
+      .where('relationship.userSecondId = :userId')
+      .getQuery();
+
+    // Main query to get users who are not in any relationship with the given user
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where(
+        `user.id != :userId AND user.id NOT IN (${subquery1}) AND user.id NOT IN (${subquery2})`,
+        { userId },
+      )
+      .setParameter('userId', userId)
+      .getMany();
+
+    return new BaseResponse({
+      statusCode: HttpStatus.OK,
+      isSuccess: true,
+      data: users,
+    });
+  }
+
   async requestFriend(body: RequestFriendDto) {
     const userRequest = await this.userRepository.findOneBy({
       id: body.userRequestId,

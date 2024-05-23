@@ -16,6 +16,11 @@ export class UserRelationshipController {
     return this.userRelationShipService.listRequests(userId);
   }
 
+  @Get('list-not-relation/:userId')
+  listNotRelation(@Param('userId') userId: string) {
+    return this.userRelationShipService.listNotRelation(userId);
+  }
+
   @Post('request-friend')
   requestFriend(@Body() body: RequestFriendDto) {
     return this.userRelationShipService.requestFriend(body);

@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { RootStackParams } from './RootStackParams';
 import FriendRequestPage from '@pages/FriendRequestPage';
+import SearchUserPage from '@pages/SearchUserPage';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
@@ -28,6 +29,14 @@ const RootStackNavigator = () => {
         <Stack.Screen
           name="FriendRequestPage"
           component={FriendRequestPage}
+          options={{
+            animation: 'ios',
+          }}
+        />
+
+        <Stack.Screen
+          name="SearchUserPage"
+          component={SearchUserPage}
           options={{
             animation: 'ios',
           }}
