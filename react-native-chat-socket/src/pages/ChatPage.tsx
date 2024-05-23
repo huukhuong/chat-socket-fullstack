@@ -14,11 +14,13 @@ import { MessageModel } from '@models/MessageModel';
 import socketService from '@services/socket.service';
 import { useQuery } from '@tanstack/react-query';
 import chatService from '@services/chat.service';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParams, 'ChatPage'>;
 const ChatPage = ({ navigation, route }: Props) => {
   const { receiverUser } = route.params;
   const flatListRef = useRef<FlashList<any>>(null);
+  const insets = useSafeAreaInsets();
 
   const currentUser = useSelector((state: RootState) => state.auth.currentUser);
 
@@ -70,9 +72,15 @@ const ChatPage = ({ navigation, route }: Props) => {
   return (
     <View className="flex-1">
       <StatusBar
-        translucent={false}
+        translucent
         backgroundColor={'#fff'}
         barStyle={'dark-content'}
+      />
+      <View
+        className="bg-white"
+        style={{
+          height: insets.top,
+        }}
       />
       {/* HEADER */}
       <View
