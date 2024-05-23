@@ -1,5 +1,6 @@
 import Images from '@assets/images';
 import { UserModel } from '@models/UserModel';
+import api from '@services/api';
 import { setCurrentUser } from '@stores/features/auth/authSlice';
 import colors from '@utils/colors';
 import { getLocalItem, LocalKey } from '@utils/localSave';
@@ -38,6 +39,7 @@ const SplashPage = () => {
     setTimeout(() => {
       if (userStr) {
         const userObj = JSON.parse(userStr) as UserModel;
+        api.updateBearerToken(userObj.accessToken);
         dispatch(setCurrentUser(userObj));
       } else {
         dispatch(setCurrentUser(null));
