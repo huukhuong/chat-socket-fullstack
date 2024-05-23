@@ -85,11 +85,6 @@ export class ChatService {
 
     const res = await queryBuilder.getMany();
 
-    console.log({
-      userId1,
-      userId2,
-    });
-
     return new BaseResponse({
       isSuccess: true,
       statusCode: HttpStatus.OK,
