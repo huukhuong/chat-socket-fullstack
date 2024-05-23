@@ -29,4 +29,9 @@ export class ChatController {
   ) {
     return this.chatService.findBetweenUsers(userId1, userId2);
   }
+
+  @Get('friend-with-last-message/:userId')
+  getFriendsWithLastestMessage(@Param('userId') userId: string) {
+    return this.chatService.getFriendsWithLastestMessage(userId);
+  }
 }

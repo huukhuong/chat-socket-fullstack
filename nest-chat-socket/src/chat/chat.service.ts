@@ -6,6 +6,8 @@ import { Message } from './message.entity';
 import { User } from 'src/auth/user.entity';
 import BaseException from 'src/utils/base-exception';
 import BaseResponse from 'src/utils/base-response';
+import { UserRelationship } from 'src/user-relationship/user-relationship.entity';
+import { FriendWithLastMessageDto } from './dto/friend-with-last-message.dto';
 
 @Injectable()
 export class ChatService {
@@ -14,6 +16,8 @@ export class ChatService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserRelationship)
+    private readonly userRelationshipRepository: Repository<UserRelationship>,
   ) {}
 
   async sendMessage(body: SendMessageDto) {
@@ -91,5 +95,51 @@ export class ChatService {
       statusCode: HttpStatus.OK,
       data: res,
     });
+  }
+
+  async getFriendsWithLastestMessage(userId: string) {
+    try {
+      // Step 1: Get the list of friends
+      const relationships = await this.userRelationshipRepository.find({
+        where: [{ userFirstId: userId }, { userSecondId: userId }],
+      });
+
+      const friendIds = relationships.map((rel) =>
+        rel.userFirstId === userId ? rel.userSecondId : rel.userFirstId,
+      );
+
+      // Step 2: For each friend, get the last message
+      const friendsWithLastMessage: FriendWithLastMessageDto[] = [];
+      for (const friendId of friendIds) {
+        const user = await this.userRepository.findOneBy({
+          id: friendId,
+        });
+
+        const lastMessage = await this.messageRepository
+          .createQueryBuilder('message')
+          .where(
+            '(message.senderId = :userId AND message.receiverId = :friendId) OR (message.senderId = :friendId AND message.receiverId = :userId)',
+            { userId, friendId },
+          )
+          .orderBy('message.createdAt', 'DESC')
+          .getOne();
+
+        friendsWithLastMessage.push({
+          user,
+          lastMessage,
+        });
+      }
+
+      return new BaseResponse({
+        isSuccess: true,
+        statusCode: HttpStatus.OK,
+        data: friendsWithLastMessage,
+      });
+    } catch (error) {
+      throw new BaseException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `${error}`,
+      });
+    }
   }
 }
