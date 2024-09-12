@@ -1,31 +1,32 @@
-import { Image, Keyboard, StatusBar, TextInput, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParams } from '@routers/RootStackParams';
-import appStyle from '@utils/appStyles';
-import Text from '@components/Text';
 import BounceButton from '@components/BounceButton';
 import Icon from '@components/Icon';
-import colors from '@utils/colors';
-import { FlashList } from '@shopify/flash-list';
-import { useSelector } from 'react-redux';
-import { RootState } from '@stores/appStore';
+import Text from '@components/Text';
 import { MessageModel } from '@models/MessageModel';
-import socketService from '@services/socket.service';
-import { useQuery } from '@tanstack/react-query';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParams } from '@routers/RootStackParams';
 import chatService from '@services/chat.service';
+import socketService from '@services/socket.service';
+import { FlashList } from '@shopify/flash-list';
+import { RootState } from '@stores/appStore';
+import { useQuery } from '@tanstack/react-query';
+import appStyle from '@utils/appStyles';
+import colors from '@utils/colors';
+import React, { useEffect, useRef, useState } from 'react';
+import { Image, StatusBar, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
 
 type Props = NativeStackScreenProps<RootStackParams, 'ChatPage'>;
 const ChatPage = ({ navigation, route }: Props) => {
-  const { receiverUser } = route.params;
+  const { receiverUser, receiverUserId } = route.params;
+
   const flatListRef = useRef<FlashList<any>>(null);
   const insets = useSafeAreaInsets();
 
   const currentUser = useSelector((state: RootState) => state.auth.currentUser);
 
   const { data: messages } = useQuery({
-    queryKey: ['messages', currentUser, receiverUser],
+    queryKey: ['messages', currentUser, receiverUser?.id || receiverUserId],
     queryFn: () =>
       chatService.findMessagesBetweenUsers(currentUser?.id, receiverUser?.id),
   });
@@ -49,11 +50,12 @@ const ChatPage = ({ navigation, route }: Props) => {
   }, [messages]);
 
   const handleSend = () => {
-    if (currentUser && receiverUser) {
+    const receiverId = receiverUser?.id || receiverUserId;
+    if (currentUser && receiverId) {
       const message: MessageModel = {
         senderId: currentUser?.id,
         content: input,
-        receiverId: receiverUser?.id,
+        receiverId: receiverId,
         type: 'text',
       };
 

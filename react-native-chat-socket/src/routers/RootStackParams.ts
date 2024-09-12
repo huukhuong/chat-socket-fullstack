@@ -6,7 +6,7 @@ export type RootStackParams = {
   SignUpPage: undefined;
   LogInPage: undefined;
   HomePage: undefined;
-  ChatPage: { receiverUser?: UserModel };
+  ChatPage: { receiverUser?: UserModel; receiverUserId?: string };
   FriendRequestPage: undefined;
   SearchUserPage: undefined;
 };

@@ -1,5 +1,6 @@
 import SplashPage from '@pages/SplashPage';
 import AuthStackNavigator from '@routers/AuthStackNavigator';
+import { navigate } from '@routers/navigationHelpers';
 import RootStackNavigator from '@routers/RootStackNavigator';
 import { appStore, RootState } from '@stores/appStore';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -26,7 +27,18 @@ const App = () => {
     });
 
     OneSignal.Notifications.addEventListener('click', event => {
-      console.log('OneSignal: notification clicked:', event);
+      const { notification } = event;
+      const additionalData = notification.additionalData as {
+        content: string;
+        senderId: string;
+        type: string;
+      };
+
+      if (additionalData.type === 'chat') {
+        navigate('ChatPage', {
+          receiverUserId: additionalData.senderId,
+        });
+      }
     });
   }, []);
 

@@ -7,12 +7,13 @@ import React from 'react';
 import { RootStackParams } from './RootStackParams';
 import FriendRequestPage from '@pages/FriendRequestPage';
 import SearchUserPage from '@pages/SearchUserPage';
+import { navigationRef } from './navigationHelpers';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
 const RootStackNavigator = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         initialRouteName="HomePage">
