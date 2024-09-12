@@ -1,6 +1,6 @@
 import SplashPage from '@pages/SplashPage';
 import AuthStackNavigator from '@routers/AuthStackNavigator';
-import { navigate } from '@routers/navigationHelpers';
+import { navigate, navigationRef } from '@routers/navigationHelpers';
 import RootStackNavigator from '@routers/RootStackNavigator';
 import { appStore, RootState } from '@stores/appStore';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -35,9 +35,11 @@ const App = () => {
       };
 
       if (additionalData.type === 'chat') {
-        navigate('ChatPage', {
-          receiverUserId: additionalData.senderId,
-        });
+        setTimeout(() => {
+          navigate('ChatPage', {
+            receiverUserId: additionalData.senderId,
+          });
+        }, 2000);
       }
     });
   }, []);

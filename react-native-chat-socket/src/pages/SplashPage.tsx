@@ -36,15 +36,13 @@ const SplashPage = () => {
 
   const getUserLocalStorage = async () => {
     const userStr = await getLocalItem(LocalKey.userLogin);
-    setTimeout(() => {
-      if (userStr) {
-        const userObj = JSON.parse(userStr) as UserModel;
-        api.updateBearerToken(userObj.accessToken);
-        dispatch(setCurrentUser(userObj));
-      } else {
-        dispatch(setCurrentUser(null));
-      }
-    }, 1000);
+    if (userStr) {
+      const userObj = JSON.parse(userStr) as UserModel;
+      api.updateBearerToken(userObj.accessToken);
+      dispatch(setCurrentUser(userObj));
+    } else {
+      dispatch(setCurrentUser(null));
+    }
   };
 
   return (
